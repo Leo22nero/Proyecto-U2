@@ -1,17 +1,20 @@
 package proyecto;
 //@author Leonardo Estrada, Mariana Correa, Ana Laura Gervacio, Julia Ruiz, Lissandro Perez.
 
+
+import org.apache.commons.validator.routines.CreditCardValidator;
+import org.apache.commons.validator.routines.RegexValidator;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class VentanaPago extends JFrame {
 
+
     private JPanel panelEST;
     private JLabel totalP;
     private int total;
 
-    // CAMPOS
     private JTextField campoTarjeta;
     private JTextField campoNombre;
     private JTextField campoFecha;
@@ -20,7 +23,6 @@ public class VentanaPago extends JFrame {
     public VentanaPago(int total) {
         super("Ventana de Pago");
 
-        // Fuentes
         Font fuente = null;
 
         try {
@@ -29,8 +31,7 @@ public class VentanaPago extends JFrame {
                     getClass().getResourceAsStream("/fuentes/Gameplay.ttf")
             ).deriveFont(Font.BOLD, 18f);
         } catch (Exception e) {
-            e.printStackTrace();
-            fuente = new Font("Arial", Font.BOLD, 14); // respaldo
+            fuente = new Font("Arial", Font.BOLD, 14);
         }
 
         Font fuenteTitulo = fuente.deriveFont(14f);
@@ -67,7 +68,7 @@ public class VentanaPago extends JFrame {
         panelEST.add(totalP);
         panelEST.add(Box.createVerticalStrut(20));
 
-        // Campos para tarjeta
+        // CAMPOS
         campoTarjeta = new JTextField();
         campoNombre = new JTextField();
         campoFecha = new JTextField();
@@ -78,7 +79,8 @@ public class VentanaPago extends JFrame {
         campoFecha.setMaximumSize(new Dimension(250, 30));
         campoCVV.setMaximumSize(new Dimension(250, 30));
 
-        panelEST.add(crearCampo("Número de tarjeta (10 dígitos):", campoTarjeta, fuente));
+
+        panelEST.add(crearCampo("Número de tarjeta:", campoTarjeta, fuente));
         panelEST.add(Box.createVerticalStrut(10));
 
         panelEST.add(crearCampo("Nombre del titular:", campoNombre, fuente));
@@ -90,7 +92,7 @@ public class VentanaPago extends JFrame {
         panelEST.add(crearCampo("CVV (3 dígitos):", campoCVV, fuente));
         panelEST.add(Box.createVerticalStrut(25));
 
-        // Realizar el pago
+        // ACCIÓN PAGAR
         Action pagarAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -100,9 +102,14 @@ public class VentanaPago extends JFrame {
                 String fecha = campoFecha.getText();
                 String cvv = campoCVV.getText();
 
-                // Verificaciones de los campos
-                if (!tarjeta.matches("\\d{10}")) {
-                    JOptionPane.showMessageDialog(null, "La tarjeta debe tener 10 dígitos");
+                // Uso de libreria para vaildar
+                CreditCardValidator validadorTarjeta = new CreditCardValidator();
+                RegexValidator validadorFecha = new RegexValidator("(0[1-9]|1[0-2])/\\d{2}");
+                RegexValidator validadorCVV = new RegexValidator("\\d{3}");
+
+
+                if (!validadorTarjeta.isValid(tarjeta)) {
+                    JOptionPane.showMessageDialog(null, "Tarjeta inválida");
                     return;
                 }
 
@@ -111,13 +118,13 @@ public class VentanaPago extends JFrame {
                     return;
                 }
 
-                if (!fecha.matches("(0[1-9]|1[0-2])/\\d{2}")) {
+                if (!validadorFecha.isValid(fecha)) {
                     JOptionPane.showMessageDialog(null, "Formato de fecha inválido (MM/AA)");
                     return;
                 }
 
-                if (!cvv.matches("\\d{3}")) {
-                    JOptionPane.showMessageDialog(null, "El CVV debe tener 3 dígitos");
+                if (!validadorCVV.isValid(cvv)) {
+                    JOptionPane.showMessageDialog(null, "CVV inválido");
                     return;
                 }
 
@@ -126,7 +133,7 @@ public class VentanaPago extends JFrame {
             }
         };
 
-        // Panel botones
+        // BOTONES
         JPanel panelBotones = new JPanel();
         panelBotones.setBackground(new Color(20, 20, 20));
         panelBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 0));
@@ -171,7 +178,6 @@ public class VentanaPago extends JFrame {
         setVisible(true);
     }
 
-    // Metodo para crear los campos de tarjeta
     private JPanel crearCampo(String texto, JTextField campo, Font fuente) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
